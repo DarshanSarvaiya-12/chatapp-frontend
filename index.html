@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>ChatApp</title>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/tweetnacl@1.0.3/nacl-fast.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tweetnacl-util@0.15.1/nacl-util.min.js"></script>
   <style>
     :root {
       --pink: #f857a6;
@@ -44,17 +46,12 @@
       flex-direction: column; z-index: 10;
     }
     .screen.active { display: flex; }
-
-    /* ── AUTH ── */
-    #auth-screen {
-      align-items: center; justify-content: center; padding: 20px;
-    }
+    #auth-screen { align-items: center; justify-content: center; padding: 20px; }
     .name-card {
       background: rgba(255,255,255,0.35);
       backdrop-filter: blur(24px);
       border: 1.5px solid rgba(255,255,255,0.6);
-      border-radius: 32px;
-      padding: 48px 36px;
+      border-radius: 32px; padding: 48px 36px;
       width: 100%; max-width: 380px;
       box-shadow: 0 8px 40px rgba(168,85,247,0.18);
       display: flex; flex-direction: column;
@@ -70,14 +67,19 @@
       background: linear-gradient(135deg, var(--pink), var(--purple));
       border-radius: 22px; display: flex;
       align-items: center; justify-content: center;
-      font-size: 34px;
-      box-shadow: 0 8px 24px rgba(168,85,247,0.35);
+      font-size: 34px; box-shadow: 0 8px 24px rgba(168,85,247,0.35);
     }
     .name-card h1 {
       font-family: 'Poppins', sans-serif;
       font-size: 26px; font-weight: 700; color: var(--text-dark);
     }
     .name-card p { font-size: 14px; color: var(--text-mid); margin-top: -10px; }
+    .e2ee-badge {
+      background: rgba(16,185,129,0.15);
+      border: 1px solid rgba(16,185,129,0.4);
+      border-radius: 20px; padding: 6px 14px;
+      font-size: 12px; font-weight: 700; color: #10b981;
+    }
     .tab-row {
       display: flex; background: rgba(255,255,255,0.4);
       border-radius: 14px; padding: 4px; width: 100%; gap: 4px;
@@ -120,20 +122,20 @@
       transition: all 0.3s;
     }
     .primary-btn:active { transform: scale(0.98); }
+    .primary-btn:disabled {
+      opacity: 0.6; cursor: not-allowed;
+    }
     .error-msg {
       color: #ef4444; font-size: 13px; text-align: center;
       background: rgba(239,68,68,0.1); padding: 8px 14px;
       border-radius: 10px; display: none;
     }
-
-    /* ── CONTACTS SCREEN ── */
     #contacts-screen { background: transparent; }
     .contacts-topbar {
       background: rgba(255,255,255,0.35);
       backdrop-filter: blur(20px);
       border-bottom: 1.5px solid rgba(255,255,255,0.5);
-      padding: 16px 20px;
-      display: flex; align-items: center;
+      padding: 16px 20px; display: flex; align-items: center;
       justify-content: space-between;
       box-shadow: 0 2px 16px rgba(0,0,0,0.06);
     }
@@ -159,7 +161,7 @@
       cursor: pointer; transition: all 0.3s;
       box-shadow: 0 2px 12px rgba(0,0,0,0.06);
     }
-    .contact-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(168,85,247,0.15); }
+    .contact-card:active { transform: scale(0.98); }
     .contact-avatar {
       width: 48px; height: 48px; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
@@ -178,15 +180,12 @@
       color: #ef4444; font-family: 'Nunito', sans-serif;
       font-size: 13px; font-weight: 700; cursor: pointer;
     }
-
-    /* ── CHAT SCREEN ── */
     #chat-screen { background: transparent; }
     #top-bar {
       background: rgba(255,255,255,0.35);
       backdrop-filter: blur(20px);
       border-bottom: 1.5px solid rgba(255,255,255,0.5);
-      padding: 14px 20px;
-      display: flex; align-items: center; gap: 14px;
+      padding: 14px 20px; display: flex; align-items: center; gap: 14px;
       box-shadow: 0 2px 16px rgba(0,0,0,0.06);
     }
     .back-btn {
@@ -204,18 +203,9 @@
       font-family: 'Poppins', sans-serif;
       font-size: 16px; font-weight: 600; color: var(--text-dark);
     }
-    .online-dot {
-      display: flex; align-items: center; gap: 5px;
-      font-size: 12px; color: var(--green); font-weight: 600;
-    }
-    .online-dot::before {
-      content: ''; width: 7px; height: 7px;
-      background: var(--green); border-radius: 50%;
-      animation: pulse 1.5s ease-in-out infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.4); opacity: 0.7; }
+    .e2ee-indicator {
+      display: flex; align-items: center; gap: 4px;
+      font-size: 11px; color: var(--green); font-weight: 700;
     }
     #messages {
       flex: 1; overflow-y: auto; padding: 16px;
@@ -253,8 +243,7 @@
       background: rgba(255,255,255,0.65);
       backdrop-filter: blur(12px);
       border: 1px solid rgba(255,255,255,0.8);
-      border-bottom-left-radius: 4px;
-      color: var(--text-dark);
+      border-bottom-left-radius: 4px; color: var(--text-dark);
       box-shadow: 0 2px 12px rgba(0,0,0,0.07);
     }
     .msg-time {
@@ -295,6 +284,11 @@
       font-size: 14px; text-align: center; padding: 40px;
     }
     #empty-state .emoji { font-size: 48px; }
+    .empty-contacts {
+      text-align: center; padding: 40px 20px;
+      color: var(--text-light); font-size: 14px;
+    }
+    .empty-contacts .emoji { font-size: 48px; display: block; margin-bottom: 10px; }
     #toast {
       position: fixed; bottom: 90px; left: 50%;
       transform: translateX(-50%) translateY(20px);
@@ -305,16 +299,10 @@
       backdrop-filter: blur(10px); white-space: nowrap;
     }
     #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-    .empty-contacts {
-      text-align: center; padding: 40px 20px;
-      color: var(--text-light); font-size: 14px;
-    }
-    .empty-contacts .emoji { font-size: 48px; display: block; margin-bottom: 10px; }
   </style>
 </head>
 <body>
 
-<!-- Background bubbles -->
 <div class="bg-bubble" style="width:120px;height:120px;background:#f857a6;left:10%;animation-duration:12s;"></div>
 <div class="bg-bubble" style="width:80px;height:80px;background:#a855f7;left:70%;animation-duration:9s;animation-delay:2s;"></div>
 <div class="bg-bubble" style="width:60px;height:60px;background:#3b82f6;left:40%;animation-duration:14s;animation-delay:4s;"></div>
@@ -325,7 +313,7 @@
   <div class="name-card">
     <div class="app-logo">💬</div>
     <h1>ChatApp</h1>
-    <p>Connect privately ✨</p>
+    <div class="e2ee-badge">🔐 End-to-End Encrypted</div>
     <div class="tab-row">
       <button class="tab-btn active" onclick="switchTab('login')">Login</button>
       <button class="tab-btn" onclick="switchTab('register')">Register</button>
@@ -340,7 +328,7 @@
         <input class="glass-input" id="login-password" type="password" placeholder="Password"/>
       </div>
       <div class="error-msg" id="login-error"></div>
-      <button class="primary-btn" onclick="login()">Login →</button>
+      <button class="primary-btn" id="login-btn" onclick="login()">Login →</button>
     </div>
     <div class="auth-form" id="register-form">
       <div class="input-wrap">
@@ -349,10 +337,10 @@
       </div>
       <div class="input-wrap">
         <span>🔒</span>
-        <input class="glass-input" id="reg-password" type="password" placeholder="Create password"/>
+        <input class="glass-input" id="reg-password" type="password" placeholder="Create password (min 4 chars)"/>
       </div>
       <div class="error-msg" id="reg-error"></div>
-      <button class="primary-btn" onclick="register()">Create Account →</button>
+      <button class="primary-btn" id="reg-btn" onclick="register()">Create Account →</button>
     </div>
   </div>
 </div>
@@ -376,7 +364,7 @@
     <div class="top-avatar" id="chat-avatar">?</div>
     <div class="top-info">
       <h3 id="chat-title">Chat</h3>
-      <div class="online-dot">Online</div>
+      <div class="e2ee-indicator">🔐 End-to-End Encrypted</div>
     </div>
   </div>
   <div id="messages">
@@ -392,233 +380,387 @@
   </div>
 </div>
 
-<!-- Toast -->
 <div id="toast"></div>
 
 <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script>
-  const BACKEND = "https://chatapp-backend-8qb3.onrender.com";
-  const socket = io(BACKEND);
+const BACKEND = "https://chatapp-backend-8qb3.onrender.com";
+const socket = io(BACKEND);
 
-  let username = "";
-  let token = "";
-  let currentRoom = "";
-  let currentPartner = "";
+let username = "";
+let token = "";
+let currentRoom = "";
+let currentPartner = "";
+let myPrivateKey = null;
+let myPublicKey = null;
+let partnerPublicKey = null;
 
-  const avatarColors = ["#f857a6","#a855f7","#3b82f6","#06b6d4","#10b981","#f59e0b","#ef4444"];
-  function getUserColor(name) {
-    let hash = 0;
-    for (let c of name) hash += c.charCodeAt(0);
-    return avatarColors[hash % avatarColors.length];
+const avatarColors = ["#f857a6","#a855f7","#3b82f6","#06b6d4","#10b981","#f59e0b","#ef4444"];
+function getUserColor(name) {
+  let hash = 0;
+  for (let c of name) hash += c.charCodeAt(0);
+  return avatarColors[hash % avatarColors.length];
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function showError(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 3000);
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach((b, i) => {
+    b.classList.toggle('active', (tab==='login'&&i===0)||(tab==='register'&&i===1));
+  });
+  document.getElementById('login-form').classList.toggle('active', tab==='login');
+  document.getElementById('register-form').classList.toggle('active', tab==='register');
+}
+
+function getRoomId(a, b) { return [a, b].sort().join("_"); }
+
+// ── CRYPTO HELPERS ──
+
+// Derive a 32-byte key from password using SHA-256
+async function deriveKeyFromPassword(password) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  return new Uint8Array(hashBuffer);
+}
+
+// Encrypt private key using password
+async function encryptPrivateKey(privateKey, password) {
+  const keyBytes = await deriveKeyFromPassword(password);
+  const nonce = nacl.randomBytes(nacl.secretbox.nonceLength);
+  const encrypted = nacl.secretbox(privateKey, nonce, keyBytes);
+  return {
+    encrypted: naclUtil.encodeBase64(encrypted),
+    nonce: naclUtil.encodeBase64(nonce)
+  };
+}
+
+// Decrypt private key using password
+async function decryptPrivateKey(encryptedData, password) {
+  const keyBytes = await deriveKeyFromPassword(password);
+  const encrypted = naclUtil.decodeBase64(encryptedData.encrypted);
+  const nonce = naclUtil.decodeBase64(encryptedData.nonce);
+  const decrypted = nacl.secretbox.open(encrypted, nonce, keyBytes);
+  return decrypted;
+}
+
+// Encrypt message with receiver's public key
+function encryptMessage(text, receiverPublicKey, senderPrivateKey) {
+  const nonce = nacl.randomBytes(nacl.box.nonceLength);
+  const msgUint8 = naclUtil.decodeUTF8(text);
+  const receiverPubKey = naclUtil.decodeBase64(receiverPublicKey);
+  const encrypted = nacl.box(msgUint8, nonce, receiverPubKey, senderPrivateKey);
+  return JSON.stringify({
+    encrypted: naclUtil.encodeBase64(encrypted),
+    nonce: naclUtil.encodeBase64(nonce)
+  });
+}
+
+// Decrypt message with your private key
+function decryptMessage(encryptedText, senderPublicKey, receiverPrivateKey) {
+  try {
+    const { encrypted, nonce } = JSON.parse(encryptedText);
+    const senderPubKey = naclUtil.decodeBase64(senderPublicKey);
+    const decrypted = nacl.box.open(
+      naclUtil.decodeBase64(encrypted),
+      naclUtil.decodeBase64(nonce),
+      senderPubKey,
+      receiverPrivateKey
+    );
+    if (!decrypted) return "🔒 Encrypted message";
+    return naclUtil.encodeUTF8(decrypted);
+  } catch {
+    return "🔒 Encrypted message";
   }
+}
 
-  function showScreen(id) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-  }
+// ── REGISTER ──
+async function register() {
+  const u = document.getElementById('reg-username').value.trim();
+  const p = document.getElementById('reg-password').value.trim();
+  if (!u || !p) return showError('reg-error', 'Fill all fields');
+  if (p.length < 4) return showError('reg-error', 'Password min 4 characters');
 
-  function showToast(msg) {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 2500);
-  }
+  const btn = document.getElementById('reg-btn');
+  btn.disabled = true;
+  btn.textContent = 'Generating keys...';
 
-  function showError(id, msg) {
-    const el = document.getElementById(id);
-    el.textContent = msg;
-    el.style.display = 'block';
-    setTimeout(() => el.style.display = 'none', 3000);
-  }
+  try {
+    // Generate key pair
+    const keyPair = nacl.box.keyPair();
+    const publicKeyB64 = naclUtil.encodeBase64(keyPair.publicKey);
 
-  function switchTab(tab) {
-    document.querySelectorAll('.tab-btn').forEach((b, i) => {
-      b.classList.toggle('active', (tab==='login'&&i===0)||(tab==='register'&&i===1));
+    // Encrypt private key with password
+    const encryptedPrivateKey = await encryptPrivateKey(keyPair.secretKey, p);
+
+    const res = await fetch(BACKEND + '/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: u,
+        password: p,
+        publicKey: publicKeyB64,
+        encryptedPrivateKey: JSON.stringify(encryptedPrivateKey)
+      })
     });
-    document.getElementById('login-form').classList.toggle('active', tab==='login');
-    document.getElementById('register-form').classList.toggle('active', tab==='register');
-  }
-
-  function getRoomId(a, b) {
-    return [a, b].sort().join("_");
-  }
-
-  // ── REGISTER ──
-  async function register() {
-    const u = document.getElementById('reg-username').value.trim();
-    const p = document.getElementById('reg-password').value.trim();
-    if (!u || !p) return showError('reg-error', 'Fill all fields');
-    try {
-      const res = await fetch(BACKEND + '/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: u, password: p })
-      });
-      const data = await res.json();
-      if (!res.ok) return showError('reg-error', data.error);
-      token = data.token;
-      username = data.username;
-      enterContacts();
-    } catch { showError('reg-error', 'Connection error'); }
-  }
-
-  // ── LOGIN ──
-  async function login() {
-    const u = document.getElementById('login-username').value.trim();
-    const p = document.getElementById('login-password').value.trim();
-    if (!u || !p) return showError('login-error', 'Fill all fields');
-    try {
-      const res = await fetch(BACKEND + '/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: u, password: p })
-      });
-      const data = await res.json();
-      if (!res.ok) return showError('login-error', data.error);
-      token = data.token;
-      username = data.username;
-      enterContacts();
-    } catch { showError('login-error', 'Connection error'); }
-  }
-
-  // ── CONTACTS ──
-  async function enterContacts() {
-    document.getElementById('my-username-badge').textContent = '👤 ' + username;
-    showScreen('contacts-screen');
-    showToast('Welcome, ' + username + '! 🎉');
-    await loadContacts();
-  }
-
-  async function loadContacts() {
-    const list = document.getElementById('contacts-list');
-    list.innerHTML = '<div style="text-align:center;padding:30px;color:#7c73b8;">Loading...</div>';
-    try {
-      const res = await fetch(BACKEND + '/users', {
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
-      const users = await res.json();
-      if (users.length === 0) {
-        list.innerHTML = `<div class="empty-contacts"><span class="emoji">🙁</span>No other users yet.<br/>Ask a friend to register!</div>`;
-        return;
-      }
-      list.innerHTML = '';
-      users.forEach(u => {
-        const color = getUserColor(u.username);
-        const initial = u.username.charAt(0).toUpperCase();
-        const card = document.createElement('div');
-        card.className = 'contact-card';
-        card.innerHTML = `
-          <div class="contact-avatar" style="background:linear-gradient(135deg,${color},${color}99)">${initial}</div>
-          <div class="contact-info">
-            <div class="contact-name">${u.username}</div>
-            <div class="contact-sub">Tap to chat privately</div>
-          </div>
-          <div class="chat-arrow">›</div>`;
-        card.onclick = () => openChat(u.username);
-        list.appendChild(card);
-      });
-    } catch {
-      list.innerHTML = '<div style="text-align:center;padding:30px;color:#ef4444;">Failed to load users</div>';
+    const data = await res.json();
+    if (!res.ok) {
+      showError('reg-error', data.error);
+      btn.disabled = false;
+      btn.textContent = 'Create Account →';
+      return;
     }
+
+    token = data.token;
+    username = data.username;
+    myPrivateKey = keyPair.secretKey;
+    myPublicKey = keyPair.publicKey;
+
+    enterContacts();
+  } catch {
+    showError('reg-error', 'Connection error');
+    btn.disabled = false;
+    btn.textContent = 'Create Account →';
   }
+}
 
-  // ── OPEN CHAT ──
-  async function openChat(partner) {
-    currentPartner = partner;
-    currentRoom = getRoomId(username, partner);
-    const color = getUserColor(partner);
-    const initial = partner.charAt(0).toUpperCase();
+// ── LOGIN ──
+async function login() {
+  const u = document.getElementById('login-username').value.trim();
+  const p = document.getElementById('login-password').value.trim();
+  if (!u || !p) return showError('login-error', 'Fill all fields');
 
-    document.getElementById('chat-title').textContent = partner;
-    document.getElementById('chat-avatar').textContent = initial;
-    document.getElementById('chat-avatar').style.background = `linear-gradient(135deg, ${color}, ${color}99)`;
-    document.getElementById('messages').innerHTML = `
-      <div id="empty-state">
-        <div class="emoji">👋</div>
-        <strong>No messages yet!</strong>
-        <span>Say hello to ${partner}!</span>
-      </div>`;
+  const btn = document.getElementById('login-btn');
+  btn.disabled = true;
+  btn.textContent = 'Decrypting keys...';
 
-    socket.emit('join_room', { userA: username, userB: partner });
-    showScreen('chat-screen');
-    await loadMessages();
+  try {
+    const res = await fetch(BACKEND + '/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: u, password: p })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      showError('login-error', data.error);
+      btn.disabled = false;
+      btn.textContent = 'Login →';
+      return;
+    }
+
+    // Decrypt private key using password
+    const encryptedPrivateKey = JSON.parse(data.encryptedPrivateKey);
+    const privateKey = await decryptPrivateKey(encryptedPrivateKey, p);
+
+    if (!privateKey) {
+      showError('login-error', 'Failed to decrypt keys. Wrong password?');
+      btn.disabled = false;
+      btn.textContent = 'Login →';
+      return;
+    }
+
+    token = data.token;
+    username = data.username;
+    myPrivateKey = privateKey;
+    myPublicKey = naclUtil.decodeBase64(data.publicKey);
+
+    enterContacts();
+  } catch {
+    showError('login-error', 'Connection error');
+    btn.disabled = false;
+    btn.textContent = 'Login →';
   }
+}
 
-  async function loadMessages() {
-    try {
-      const res = await fetch(BACKEND + '/messages/' + currentRoom, {
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
-      const msgs = await res.json();
-      if (msgs.length > 0) {
-        document.getElementById('empty-state')?.remove();
-        msgs.forEach(m => addMessage(m.username, m.text, m.timestamp, false));
-        scrollBottom();
+// ── CONTACTS ──
+async function enterContacts() {
+  document.getElementById('my-username-badge').textContent = '👤 ' + username;
+  document.getElementById('login-btn').disabled = false;
+  document.getElementById('login-btn').textContent = 'Login →';
+  showScreen('contacts-screen');
+  showToast('Welcome, ' + username + '! 🔐');
+  await loadContacts();
+}
+
+async function loadContacts() {
+  const list = document.getElementById('contacts-list');
+  list.innerHTML = '<div style="text-align:center;padding:30px;color:#7c73b8;">Loading...</div>';
+  try {
+    const res = await fetch(BACKEND + '/users', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    const users = await res.json();
+    if (users.length === 0) {
+      list.innerHTML = `<div class="empty-contacts"><span class="emoji">🙁</span>No other users yet.<br/>Ask a friend to register!</div>`;
+      return;
+    }
+    list.innerHTML = '';
+    users.forEach(u => {
+      const color = getUserColor(u.username);
+      const initial = u.username.charAt(0).toUpperCase();
+      const card = document.createElement('div');
+      card.className = 'contact-card';
+      card.innerHTML = `
+        <div class="contact-avatar" style="background:linear-gradient(135deg,${color},${color}99)">${initial}</div>
+        <div class="contact-info">
+          <div class="contact-name">${u.username}</div>
+          <div class="contact-sub">🔐 End-to-end encrypted</div>
+        </div>
+        <div class="chat-arrow">›</div>`;
+      card.onclick = () => openChat(u.username, u.publicKey);
+      list.appendChild(card);
+    });
+  } catch {
+    list.innerHTML = '<div style="text-align:center;padding:30px;color:#ef4444;">Failed to load</div>';
+  }
+}
+
+// ── OPEN CHAT ──
+async function openChat(partner, partnerPubKeyB64) {
+  currentPartner = partner;
+  currentRoom = getRoomId(username, partner);
+  partnerPublicKey = partnerPubKeyB64;
+
+  const color = getUserColor(partner);
+  document.getElementById('chat-title').textContent = partner;
+  document.getElementById('chat-avatar').textContent = partner.charAt(0).toUpperCase();
+  document.getElementById('chat-avatar').style.background = `linear-gradient(135deg, ${color}, ${color}99)`;
+  document.getElementById('messages').innerHTML = `
+    <div id="empty-state">
+      <div class="emoji">👋</div>
+      <strong>No messages yet!</strong>
+      <span>Say hello to ${partner}!</span>
+    </div>`;
+
+  socket.emit('join_room', { userA: username, userB: partner });
+  showScreen('chat-screen');
+  await loadMessages();
+}
+
+// ── LOAD MESSAGES ──
+async function loadMessages() {
+  try {
+    const res = await fetch(BACKEND + '/messages/' + currentRoom, {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    const msgs = await res.json();
+    if (msgs.length > 0) {
+      document.getElementById('empty-state')?.remove();
+      for (const m of msgs) {
+        const isMine = m.username === username;
+        let text = m.text;
+        try {
+          const senderPubKey = isMine
+            ? naclUtil.encodeBase64(myPublicKey)
+            : partnerPublicKey;
+          text = decryptMessage(m.text, senderPubKey, myPrivateKey);
+        } catch {}
+        addMessage(m.username, text, m.timestamp, false);
       }
-    } catch {}
-  }
+      scrollBottom();
+    }
+  } catch {}
+}
 
-  // ── SEND ──
-  document.getElementById('send-btn').addEventListener('click', sendMessage);
-  document.getElementById('msg-input').addEventListener('keypress', e => {
-    if (e.key === 'Enter') sendMessage();
+// ── SEND MESSAGE ──
+document.getElementById('send-btn').addEventListener('click', sendMessage);
+document.getElementById('msg-input').addEventListener('keypress', e => {
+  if (e.key === 'Enter') sendMessage();
+});
+
+function sendMessage() {
+  const text = document.getElementById('msg-input').value.trim();
+  if (!text || !username || !currentRoom || !partnerPublicKey || !myPrivateKey) return;
+
+  // Encrypt for receiver
+  const encryptedForReceiver = encryptMessage(text, partnerPublicKey, myPrivateKey);
+
+  socket.emit('send_message', {
+    username,
+    text: encryptedForReceiver,
+    roomId: currentRoom
   });
 
-  function sendMessage() {
-    const text = document.getElementById('msg-input').value.trim();
-    if (!text || !username || !currentRoom) return;
-    socket.emit('send_message', { username, text, roomId: currentRoom });
-    document.getElementById('msg-input').value = '';
-  }
+  document.getElementById('msg-input').value = '';
 
-  // ── RECEIVE ──
-  socket.on('receive_message', data => {
-    document.getElementById('empty-state')?.remove();
-    addMessage(data.username, data.text, data.timestamp, true);
-    scrollBottom();
-  });
+  // Show own message immediately (decrypted)
+  document.getElementById('empty-state')?.remove();
+  addMessage(username, text, new Date(), true);
+  scrollBottom();
+}
 
-  // ── ADD BUBBLE ──
-  function addMessage(user, text, timestamp, animate) {
-    const isMine = user === username;
-    const color = getUserColor(user);
-    const initial = user.charAt(0).toUpperCase();
-    const time = new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    const row = document.createElement('div');
-    row.className = 'msg-row ' + (isMine ? 'mine' : 'other');
-    if (!animate) row.style.animation = 'none';
-    row.innerHTML = `
-      <div class="msg-avatar" style="background:linear-gradient(135deg,${color},${color}99)">${initial}</div>
-      <div class="msg-bubble">
-        <div>${text}</div>
-        <div class="msg-time">${time}</div>
-      </div>`;
-    document.getElementById('messages').appendChild(row);
-  }
+// ── RECEIVE MESSAGE ──
+socket.on('receive_message', data => {
+  if (data.username === username) return; // already shown above
+  document.getElementById('empty-state')?.remove();
+  let text = data.text;
+  try {
+    text = decryptMessage(data.text, partnerPublicKey, myPrivateKey);
+  } catch {}
+  addMessage(data.username, text, data.timestamp, true);
+  scrollBottom();
+});
 
-  function scrollBottom() {
-    const m = document.getElementById('messages');
-    m.scrollTop = m.scrollHeight;
-  }
+// ── ADD BUBBLE ──
+function addMessage(user, text, timestamp, animate) {
+  const isMine = user === username;
+  const color = getUserColor(user);
+  const initial = user.charAt(0).toUpperCase();
+  const time = new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const row = document.createElement('div');
+  row.className = 'msg-row ' + (isMine ? 'mine' : 'other');
+  if (!animate) row.style.animation = 'none';
+  row.innerHTML = `
+    <div class="msg-avatar" style="background:linear-gradient(135deg,${color},${color}99)">${initial}</div>
+    <div class="msg-bubble">
+      <div>${text}</div>
+      <div class="msg-time">${time}</div>
+    </div>`;
+  document.getElementById('messages').appendChild(row);
+}
 
-  function goBack() {
-    showScreen('contacts-screen');
-    currentRoom = '';
-    currentPartner = '';
-  }
+function scrollBottom() {
+  const m = document.getElementById('messages');
+  m.scrollTop = m.scrollHeight;
+}
 
-  function logout() {
-    username = ''; token = ''; currentRoom = ''; currentPartner = '';
-    showScreen('auth-screen');
-  }
+function goBack() {
+  showScreen('contacts-screen');
+  currentRoom = '';
+  currentPartner = '';
+  partnerPublicKey = null;
+}
 
-  // Enter key for auth
-  document.getElementById('login-password').addEventListener('keypress', e => {
-    if (e.key === 'Enter') login();
-  });
-  document.getElementById('reg-password').addEventListener('keypress', e => {
-    if (e.key === 'Enter') register();
-  });
+function logout() {
+  username = ''; token = ''; currentRoom = '';
+  currentPartner = ''; myPrivateKey = null;
+  myPublicKey = null; partnerPublicKey = null;
+  showScreen('auth-screen');
+}
+
+document.getElementById('login-password').addEventListener('keypress', e => {
+  if (e.key === 'Enter') login();
+});
+document.getElementById('reg-password').addEventListener('keypress', e => {
+  if (e.key === 'Enter') register();
+});
 </script>
 </body>
 </html>
