@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChatApp</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Name Screen -->
+  <div id="name-screen">
+    <h2>💬 ChatApp</h2>
+    <p style="color:#8696a0">Enter your name to start chatting</p>
+    <input id="name-input" type="text" placeholder="Your name..." maxlength="20"/>
+    <button id="join-btn">Join Chat</button>
+  </div>
+
+  <!-- Chat Screen -->
+  <div id="top-bar">💬 ChatApp</div>
+  <div id="messages"></div>
+  <div id="bottom-bar">
+    <input id="msg-input" type="text" placeholder="Type a message..."/>
+    <button id="send-btn">➤</button>
+  </div>
+
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <script>
+    const BACKEND = "https://chatapp-backend-8qb3.onrender.com";
+    const socket = io(BACKEND);
+
+    let username = "";
+
+    const nameScreen = document.getElementById("name-screen");
+    const nameInput = document.getElementById("name-input");
+    const joinBtn = document.getElementById("join-btn");
+    const messagesDiv = document.getElementById("messages");
+    const msgInput = document.getElementById("msg-input");
+    const sendBtn = document.getElementById("send-btn");
+
+    // Join chat
+    joinBtn.addEventListener("click", () => {
+      const name = nameInput.value.trim();
+      if (!name) return;
+      username = name;
+      nameScreen.style.display = "none";
+      loadOldMessages();
+    });
+
+    nameInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") joinBtn.click();
+    });
+
+    // Load old messages
+    async function loadOldMessages() {
+      const res = await fetch(BACKEND + "/messages");
+      const msgs = await res.json();
+      msgs.forEach(m => addMessage(m.username, m.text, m.timestamp));
+      scrollBottom();
+    }
+
+    // Send message
+    sendBtn.addEventListener("click", sendMessage);
+    msgInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") sendMessage();
+    });
+
+    function sendMessage() {
+      const text = msgInput.value.trim();
+      if (!text) return;
+      socket.emit("send_message", { username, text });
+      msgInput.value = "";
+    }
+
+    // Receive message
+    socket.on("receive_message", (data) => {
+      addMessage(data.username, data.text, data.timestamp);
+      scrollBottom();
+    });
+
+    // Add bubble to UI
+    function addMessage(user, text, timestamp) {
+      const isMine = user === username;
+      const time = new Date(timestamp).toLocaleTimeString([], {
+        hour: "2-digit", minute: "2-digit"
+      });
+
+      const bubble = document.createElement("div");
+      bubble.className = "msg-bubble " + (isMine ? "mine" : "other");
+      bubble.innerHTML = `
+        ${!isMine ? `<div class="msg-username">${user}</div>` : ""}
+        <div>${text}</div>
+        <div class="msg-time">${time}</div>
+      `;
+      messagesDiv.appendChild(bubble);
+    }
+
+    function scrollBottom() {
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+  </script>
+
+</body>
+</html>
