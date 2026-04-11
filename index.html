@@ -11,28 +11,30 @@
   <style>
     :root {
       --black: #0a0a0a;
+      --gray-1: #f5f5f5;
+      --gray-2: #e8e8e8;
+      --gray-3: #c0c0c0;
+      --gray-4: #888888;
+      --accent: #0066ff;
+      --accent-light: #e8f0ff;
+      --red: #ef4444;
+      --green: #22c55e;
       --white: #ffffff;
-      --grey-50: #f9f9f9;
-      --grey-100: #f0f0f0;
-      --grey-200: #e0e0e0;
-      --grey-400: #9a9a9a;
-      --grey-600: #555555;
-      --green: #16a34a;
-      --red: #dc2626;
-      --border: 1px solid #0a0a0a;
-      --border-light: 1px solid #e0e0e0;
+      --border: 1px solid #e0e0e0;
+      --radius: 12px;
+      --font: 'DM Sans', sans-serif;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     body {
-      font-family: 'DM Sans', sans-serif;
+      font-family: var(--font);
       background: var(--white);
       color: var(--black);
-      height: 100vh; overflow: hidden;
+      height: 100vh;
+      overflow: hidden;
     }
     .screen {
-      position: fixed; inset: 0;
-      display: none; flex-direction: column;
-      background: var(--white);
+      position: fixed; inset: 0; display: none;
+      flex-direction: column; background: var(--white);
     }
     .screen.active { display: flex; }
 
@@ -40,203 +42,192 @@
     #auth-screen { align-items: center; justify-content: center; padding: 24px; }
     .auth-card {
       width: 100%; max-width: 360px;
-      border: var(--border); border-radius: 28px;
-      padding: 36px 28px;
-      display: flex; flex-direction: column; gap: 18px;
+      border: 1px solid var(--gray-2);
+      border-radius: 20px; padding: 36px 28px;
+      background: var(--white);
     }
-    .app-name {
-      font-family: 'DM Serif Display', serif;
-      font-size: 32px; color: var(--black); line-height: 1;
+    .auth-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+    .logo-icon {
+      width: 40px; height: 40px; background: var(--black);
+      border-radius: 10px; display: flex; align-items: center;
+      justify-content: center; font-size: 20px;
     }
-    .app-sub {
-      font-size: 13px; color: var(--grey-600);
-      display: flex; align-items: center; gap: 6px;
-    }
-    .e2ee-pill {
-      background: var(--black); color: var(--white);
-      font-size: 11px; font-weight: 600;
-      padding: 3px 10px; border-radius: 20px;
+    .logo-text { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--black); }
+    .auth-subtitle { font-size: 13px; color: var(--gray-4); margin-bottom: 20px; }
+    .e2ee-tag {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: #f0fdf4; border: 1px solid #bbf7d0;
+      border-radius: 20px; padding: 4px 10px;
+      font-size: 11px; font-weight: 600; color: #16a34a; margin-bottom: 20px;
     }
     .tab-row {
-      display: flex; border: var(--border);
-      border-radius: 8px; overflow: hidden;
+      display: flex; border: var(--border); border-radius: 10px;
+      padding: 3px; margin-bottom: 20px; gap: 3px;
     }
     .tab-btn {
-      flex: 1; padding: 10px; border: none;
-      background: transparent; font-family: 'DM Sans', sans-serif;
-      font-size: 14px; font-weight: 500;
-      cursor: pointer; color: var(--grey-400); transition: all 0.2s;
+      flex: 1; padding: 9px; border: none; border-radius: 8px;
+      font-family: var(--font); font-size: 14px; font-weight: 600;
+      cursor: pointer; background: transparent; color: var(--gray-4); transition: all 0.2s;
     }
-    .tab-btn.active { background: var(--black); color: var(--white); font-weight: 600; }
+    .tab-btn.active { background: var(--black); color: var(--white); }
     .auth-form { display: none; flex-direction: column; gap: 12px; }
     .auth-form.active { display: flex; }
     .field-label {
-      font-size: 11px; font-weight: 700; color: var(--grey-600);
-      letter-spacing: 0.6px; text-transform: uppercase; margin-bottom: 4px;
+      font-size: 12px; font-weight: 600; color: var(--gray-4);
+      margin-bottom: 4px; letter-spacing: 0.5px; text-transform: uppercase;
     }
-    .field-group { display: flex; flex-direction: column; gap: 4px; }
-    .text-input {
-      width: 100%; padding: 13px 14px;
-      border: var(--border); border-radius: 8px;
-      font-family: 'DM Sans', sans-serif; font-size: 15px;
-      color: var(--black); background: var(--white); outline: none; transition: all 0.2s;
+    .field-wrap { display: flex; flex-direction: column; }
+    .app-input {
+      width: 100%; padding: 12px 14px;
+      border: 1px solid var(--gray-2); border-radius: var(--radius);
+      font-family: var(--font); font-size: 15px; color: var(--black);
+      background: var(--white); outline: none; transition: border-color 0.2s;
     }
-    .text-input:focus { box-shadow: 0 0 0 3px rgba(10,10,10,0.08); }
-    .text-input::placeholder { color: var(--grey-400); }
-    .submit-btn {
-      width: 100%; padding: 14px;
-      background: var(--black); color: var(--white);
-      border: var(--border); border-radius: 8px;
-      font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600;
-      cursor: pointer; transition: all 0.2s;
-    }
-    .submit-btn:active { opacity: 0.8; transform: scale(0.98); }
-    .submit-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .app-input:focus { border-color: var(--black); }
+    .app-input::placeholder { color: var(--gray-3); }
     .error-msg {
-      font-size: 13px; color: var(--red);
-      background: #fef2f2; border: 1px solid #fecaca;
-      padding: 9px 12px; border-radius: 8px; display: none;
+      font-size: 13px; color: var(--red); background: #fef2f2;
+      border: 1px solid #fecaca; border-radius: 8px;
+      padding: 8px 12px; display: none; text-align: center;
     }
+    .submit-btn {
+      width: 100%; padding: 13px; background: var(--black);
+      border: none; border-radius: var(--radius); color: var(--white);
+      font-family: var(--font); font-size: 15px; font-weight: 600;
+      cursor: pointer; transition: opacity 0.2s; margin-top: 4px;
+    }
+    .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .submit-btn:active { opacity: 0.8; }
 
     /* CONTACTS */
     .topbar {
-      border-bottom: var(--border); padding: 16px 20px;
+      padding: 16px 20px; border-bottom: var(--border);
       display: flex; align-items: center; justify-content: space-between;
+      background: var(--white);
     }
-    .topbar-title {
-      font-family: 'DM Serif Display', serif;
-      font-size: 24px; color: var(--black);
-    }
+    .topbar-left { display: flex; flex-direction: column; gap: 2px; }
+    .topbar-title { font-family: 'DM Serif Display', serif; font-size: 22px; }
+    .topbar-sub { font-size: 12px; color: var(--gray-4); }
     .topbar-right { display: flex; align-items: center; gap: 8px; }
-    .username-chip {
-      border: var(--border); border-radius: 20px;
-      padding: 5px 12px; font-size: 13px; font-weight: 600;
+    .username-pill {
+      background: var(--accent-light); border: 1px solid #c7d9ff;
+      border-radius: 20px; padding: 5px 12px;
+      font-size: 13px; font-weight: 600; color: var(--accent);
     }
-    .icon-btn {
-      width: 36px; height: 36px; border: var(--border);
-      border-radius: 8px; background: var(--white);
-      cursor: pointer; display: flex; align-items: center;
-      justify-content: center; font-size: 16px;
+    .logout-btn {
+      background: #fef2f2; border: 1px solid #fecaca;
+      border-radius: 8px; padding: 7px 12px; color: var(--red);
+      font-family: var(--font); font-size: 13px; font-weight: 600; cursor: pointer;
     }
-    .icon-btn:active { background: var(--grey-100); }
-    #contacts-list { flex: 1; overflow-y: auto; }
-    #contacts-list::-webkit-scrollbar { width: 0; }
+    #contacts-list {
+      flex: 1; overflow-y: auto; padding: 12px 16px;
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    #contacts-list::-webkit-scrollbar { width: 3px; }
     .contact-item {
-      display: flex; align-items: center; gap: 14px;
-      padding: 16px 20px; border-bottom: var(--border-light);
-      cursor: pointer; transition: background 0.15s;
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 14px; border: 1px solid var(--gray-2);
+      border-radius: var(--radius); cursor: pointer;
+      transition: background 0.15s; background: var(--white);
     }
-    .contact-item:active { background: var(--grey-50); }
-    .contact-avatar {
-      width: 44px; height: 44px; border: var(--border);
-      border-radius: 50%; display: flex; align-items: center;
-      justify-content: center; font-size: 17px; font-weight: 700;
-      color: var(--white); flex-shrink: 0;
+    .contact-item:active { background: var(--gray-1); }
+    .contact-av {
+      width: 44px; height: 44px; border-radius: 50%;
+      border: 1px solid var(--gray-2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px; font-weight: 700; color: var(--white); flex-shrink: 0;
     }
-    .contact-details { flex: 1; min-width: 0; }
+    .contact-details { flex: 1; }
     .contact-name { font-size: 15px; font-weight: 600; }
-    .contact-sub { font-size: 12px; color: var(--grey-400); margin-top: 2px; }
-    .contact-arrow { font-size: 20px; color: var(--grey-400); }
+    .contact-hint { font-size: 12px; color: var(--gray-4); margin-top: 1px; }
+    .contact-arrow { color: var(--gray-3); font-size: 18px; }
     .empty-state {
       flex: 1; display: flex; flex-direction: column;
       align-items: center; justify-content: center;
-      gap: 10px; color: var(--grey-400); font-size: 14px;
-      text-align: center; padding: 40px;
+      gap: 8px; color: var(--gray-4); font-size: 14px; text-align: center; padding: 40px;
     }
-    .empty-icon { font-size: 44px; }
-    .loading-text { text-align: center; padding: 30px; color: var(--grey-400); font-size: 14px; }
+    .empty-icon { font-size: 40px; margin-bottom: 4px; }
 
     /* CHAT */
     #chat-topbar {
-      border-bottom: var(--border); padding: 12px 16px;
-      display: flex; align-items: center; gap: 12px;
+      padding: 12px 16px; border-bottom: var(--border);
+      display: flex; align-items: center; gap: 12px; background: var(--white);
     }
     .back-btn {
       width: 36px; height: 36px; border: var(--border);
-      border-radius: 8px; background: var(--white); cursor: pointer;
-      display: flex; align-items: center; justify-content: center; font-size: 18px;
+      border-radius: 8px; background: var(--white);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 18px; color: var(--black); flex-shrink: 0;
     }
-    .chat-avatar {
-      width: 38px; height: 38px; border: var(--border);
-      border-radius: 50%; display: flex; align-items: center;
-      justify-content: center; font-size: 15px; font-weight: 700;
-      color: var(--white); flex-shrink: 0;
+    .chat-av {
+      width: 38px; height: 38px; border-radius: 50%;
+      border: 1px solid var(--gray-2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; font-weight: 700; color: var(--white); flex-shrink: 0;
     }
-    .chat-info { flex: 1; min-width: 0; }
-    .chat-name { font-size: 15px; font-weight: 700; }
-    .chat-status {
-      font-size: 11px; color: var(--green); font-weight: 500;
-      display: flex; align-items: center; gap: 4px;
-    }
-    .chat-status::before {
-      content: ''; width: 6px; height: 6px;
-      background: var(--green); border-radius: 50%;
-    }
-    .e2ee-tag {
-      border: var(--border-light); border-radius: 20px;
-      padding: 3px 10px; font-size: 10px; font-weight: 600;
-      color: var(--grey-600); white-space: nowrap;
-    }
+    .chat-topbar-info { flex: 1; }
+    .chat-topbar-name { font-size: 15px; font-weight: 600; }
+    .chat-e2ee { font-size: 11px; color: var(--green); font-weight: 600; }
     #messages {
-      flex: 1; overflow-y: auto; padding: 14px 12px;
-      display: flex; flex-direction: column; gap: 8px;
-      background: var(--grey-50);
+      flex: 1; overflow-y: auto; padding: 16px;
+      display: flex; flex-direction: column; gap: 8px; background: var(--gray-1);
     }
-    #messages::-webkit-scrollbar { width: 0; }
-    .msg-row {
-      display: flex; align-items: flex-end; gap: 7px;
-      animation: msgIn 0.22s ease;
+    #messages::-webkit-scrollbar { width: 3px; }
+    #chat-empty {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 8px; color: var(--gray-4); font-size: 14px; text-align: center;
     }
-    @keyframes msgIn {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+    .msg-row { display: flex; align-items: flex-end; gap: 6px; }
     .msg-row.mine { flex-direction: row-reverse; }
     .msg-av {
-      width: 26px; height: 26px; border: var(--border);
-      border-radius: 50%; display: flex; align-items: center;
-      justify-content: center; font-size: 10px; font-weight: 700;
-      color: var(--white); flex-shrink: 0;
+      width: 24px; height: 24px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 700; color: var(--white);
+      flex-shrink: 0; border: 1px solid var(--gray-2);
     }
     .msg-bubble {
-      max-width: 74%; padding: 10px 13px;
+      max-width: 75%; padding: 9px 13px; border-radius: 16px;
       font-size: 14.5px; line-height: 1.5; word-break: break-word;
+      border: 1px solid transparent;
     }
     .msg-row.mine .msg-bubble {
-      background: var(--black); color: var(--white); border: var(--border);
-      border-radius: 14px 14px 4px 14px;
+      background: var(--black); color: var(--white);
+      border-color: var(--black); border-bottom-right-radius: 4px;
     }
     .msg-row.other .msg-bubble {
-      background: var(--white); color: var(--black); border: var(--border);
-      border-radius: 14px 14px 14px 4px;
+      background: var(--white); color: var(--black);
+      border-color: var(--gray-2); border-bottom-left-radius: 4px;
     }
-    .msg-time { font-size: 10px; margin-top: 4px; text-align: right; opacity: 0.5; }
-    .msg-row.mine .msg-time { color: var(--grey-200); }
-    #input-bar {
-      border-top: var(--border); padding: 10px 14px;
+    .msg-time { font-size: 10px; margin-top: 3px; opacity: 0.5; text-align: right; }
+    .msg-row.other .msg-time { text-align: left; }
+    #bottom-bar {
+      padding: 10px 12px; border-top: var(--border);
       display: flex; gap: 8px; align-items: center; background: var(--white);
     }
     #msg-input {
-      flex: 1; padding: 11px 14px; border: var(--border);
-      border-radius: 14px; font-family: 'DM Sans', sans-serif;
-      font-size: 15px; color: var(--black); background: var(--white); outline: none;
+      flex: 1; padding: 11px 14px;
+      border: 1px solid var(--gray-2); border-radius: 22px;
+      font-family: var(--font); font-size: 15px; color: var(--black);
+      background: var(--gray-1); outline: none; transition: border-color 0.2s;
     }
-    #msg-input:focus { box-shadow: 0 0 0 3px rgba(10,10,10,0.08); }
-    #msg-input::placeholder { color: var(--grey-400); }
+    #msg-input:focus { border-color: var(--black); background: var(--white); }
+    #msg-input::placeholder { color: var(--gray-3); }
     #send-btn {
       width: 44px; height: 44px; background: var(--black);
-      color: var(--white); border: var(--border); border-radius: 8px;
-      font-size: 20px; cursor: pointer; display: flex;
-      align-items: center; justify-content: center; flex-shrink: 0;
+      border: none; border-radius: 50%; color: var(--white);
+      font-size: 18px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
     }
-    #send-btn:active { transform: scale(0.92); }
+    #send-btn:active { opacity: 0.7; }
 
-    /* Toast */
+    /* TOAST */
     #toast {
       position: fixed; bottom: 80px; left: 50%;
       transform: translateX(-50%) translateY(10px);
       background: var(--black); color: var(--white);
-      padding: 9px 20px; border-radius: 20px; font-size: 13px;
+      padding: 9px 20px; border-radius: 20px;
+      font-size: 13px; font-weight: 500;
       opacity: 0; transition: all 0.25s; z-index: 999;
       white-space: nowrap; pointer-events: none;
     }
@@ -248,34 +239,36 @@
 <!-- AUTH -->
 <div id="auth-screen" class="screen active">
   <div class="auth-card">
-    <div>
-      <div class="app-name">ChatApp</div>
-      <div class="app-sub"><span class="e2ee-pill">🔐 E2EE</span> Private &amp; Secure</div>
+    <div class="auth-logo">
+      <div class="logo-icon">💬</div>
+      <div class="logo-text">ChatApp</div>
     </div>
+    <div class="auth-subtitle">Secure private messaging</div>
+    <div class="e2ee-tag">🔐 End-to-End Encrypted</div>
     <div class="tab-row">
       <button class="tab-btn active" onclick="switchTab('login')">Login</button>
       <button class="tab-btn" onclick="switchTab('register')">Register</button>
     </div>
     <div class="auth-form active" id="login-form">
-      <div class="field-group">
+      <div class="field-wrap">
         <div class="field-label">Username</div>
-        <input class="text-input" id="login-username" type="text" placeholder="Enter username" autocomplete="off"/>
+        <input class="app-input" id="login-username" type="text" placeholder="Enter username" autocomplete="off"/>
       </div>
-      <div class="field-group">
+      <div class="field-wrap">
         <div class="field-label">Password</div>
-        <input class="text-input" id="login-password" type="password" placeholder="Enter password"/>
+        <input class="app-input" id="login-password" type="password" placeholder="Enter password"/>
       </div>
       <div class="error-msg" id="login-error"></div>
       <button class="submit-btn" id="login-btn" onclick="login()">Login</button>
     </div>
     <div class="auth-form" id="register-form">
-      <div class="field-group">
+      <div class="field-wrap">
         <div class="field-label">Username</div>
-        <input class="text-input" id="reg-username" type="text" placeholder="Choose a username" autocomplete="off"/>
+        <input class="app-input" id="reg-username" type="text" placeholder="Choose a username" autocomplete="off"/>
       </div>
-      <div class="field-group">
+      <div class="field-wrap">
         <div class="field-label">Password</div>
-        <input class="text-input" id="reg-password" type="password" placeholder="Min 4 characters"/>
+        <input class="app-input" id="reg-password" type="password" placeholder="Min 4 characters"/>
       </div>
       <div class="error-msg" id="reg-error"></div>
       <button class="submit-btn" id="reg-btn" onclick="register()">Create Account</button>
@@ -286,10 +279,13 @@
 <!-- CONTACTS -->
 <div id="contacts-screen" class="screen">
   <div class="topbar">
-    <div class="topbar-title">Chats</div>
+    <div class="topbar-left">
+      <div class="topbar-title">Chats</div>
+      <div class="topbar-sub" id="contacts-count"></div>
+    </div>
     <div class="topbar-right">
-      <div class="username-chip" id="my-badge">Me</div>
-      <button class="icon-btn" onclick="logout()">↩</button>
+      <div class="username-pill" id="my-badge">Me</div>
+      <button class="logout-btn" onclick="logout()">Logout</button>
     </div>
   </div>
   <div id="contacts-list"></div>
@@ -299,23 +295,22 @@
 <div id="chat-screen" class="screen">
   <div id="chat-topbar">
     <button class="back-btn" onclick="goBack()">←</button>
-    <div class="chat-avatar" id="chat-av"></div>
-    <div class="chat-info">
-      <div class="chat-name" id="chat-name">Chat</div>
-      <div class="chat-status">Online</div>
+    <div class="chat-av" id="chat-av">?</div>
+    <div class="chat-topbar-info">
+      <div class="chat-topbar-name" id="chat-name">Chat</div>
+      <div class="chat-e2ee">🔐 End-to-end encrypted</div>
     </div>
-    <div class="e2ee-tag">🔐 Encrypted</div>
   </div>
   <div id="messages">
-    <div class="empty-state" id="empty-state">
+    <div id="chat-empty">
       <div class="empty-icon">👋</div>
       <strong>No messages yet</strong>
-      <span>Start the conversation!</span>
+      <span>Say hello!</span>
     </div>
   </div>
-  <div id="input-bar">
+  <div id="bottom-bar">
     <input id="msg-input" type="text" placeholder="Message..."/>
-    <button id="send-btn">↑</button>
+    <button id="send-btn">➤</button>
   </div>
 </div>
 
@@ -326,72 +321,96 @@
 const BACKEND = "https://chatapp-backend-8qb3.onrender.com";
 const socket = io(BACKEND, { transports: ['websocket', 'polling'] });
 
-let username = "", token = "", currentRoom = "", currentPartner = "";
-let myPrivateKey = null, myPublicKey = null, partnerPubB64 = null;
+let myUsername = "";
+let myToken = "";
+let myPrivateKey = null;
+let myPublicKey = null;
+let currentRoom = "";
+let currentPartner = "";
+let partnerPubB64 = "";
 
-const COLORS = ["#1a1a2e","#16213e","#0f3460","#533483","#2b2d42","#1b4332","#7b2d8b","#c0392b"];
-function getColor(n) { let h=0; for(let c of n) h+=c.charCodeAt(0); return COLORS[h%COLORS.length]; }
+const COLORS = ["#0066ff","#e11d48","#7c3aed","#0891b2","#059669","#d97706","#dc2626"];
+function colorFor(name) {
+  let h = 0;
+  for (let c of name) h += c.charCodeAt(0);
+  return COLORS[h % COLORS.length];
+}
 
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
+
 function showToast(msg) {
   const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
 }
-function showError(id, msg) {
+
+function showErr(id, msg) {
   const el = document.getElementById(id);
-  el.textContent = msg; el.style.display = 'block';
-  setTimeout(() => el.style.display = 'none', 4000);
+  el.textContent = msg;
+  el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 3500);
 }
+
 function switchTab(tab) {
-  document.querySelectorAll('.tab-btn').forEach((b,i) => {
+  document.querySelectorAll('.tab-btn').forEach((b, i) => {
     b.classList.toggle('active', (tab==='login'&&i===0)||(tab==='register'&&i===1));
   });
   document.getElementById('login-form').classList.toggle('active', tab==='login');
   document.getElementById('register-form').classList.toggle('active', tab==='register');
 }
-function getRoomId(a,b) { return [a,b].sort().join("_"); }
+
+function roomId(a, b) { return [a,b].sort().join('_'); }
 
 // CRYPTO
-async function deriveKey(pw) {
-  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pw));
+async function deriveKey(password) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(password));
   return new Uint8Array(buf);
 }
-async function encryptPrivKey(priv, pw) {
-  const key = await deriveKey(pw);
-  const n = nacl.randomBytes(nacl.secretbox.nonceLength);
-  const e = nacl.secretbox(priv, n, key);
-  return JSON.stringify({ e: naclUtil.encodeBase64(e), n: naclUtil.encodeBase64(n) });
+
+async function encryptPrivKey(privKey, password) {
+  const key = await deriveKey(password);
+  const nonce = nacl.randomBytes(nacl.secretbox.nonceLength);
+  const box = nacl.secretbox(privKey, nonce, key);
+  return JSON.stringify({ e: naclUtil.encodeBase64(box), n: naclUtil.encodeBase64(nonce) });
 }
-async function decryptPrivKey(stored, pw) {
-  const key = await deriveKey(pw);
+
+async function decryptPrivKey(stored, password) {
+  const key = await deriveKey(password);
   const { e, n } = JSON.parse(stored);
   return nacl.secretbox.open(naclUtil.decodeBase64(e), naclUtil.decodeBase64(n), key);
 }
-function encryptMsg(text, receiverPub, senderPriv) {
+
+function encryptMsg(text, receiverPubB64, senderPriv) {
   const nonce = nacl.randomBytes(nacl.box.nonceLength);
-  const enc = nacl.box(naclUtil.decodeUTF8(text), nonce, naclUtil.decodeBase64(receiverPub), senderPriv);
-  return JSON.stringify({ e: naclUtil.encodeBase64(enc), n: naclUtil.encodeBase64(nonce) });
+  const box = nacl.box(naclUtil.decodeUTF8(text), nonce, naclUtil.decodeBase64(receiverPubB64), senderPriv);
+  return JSON.stringify({ e: naclUtil.encodeBase64(box), n: naclUtil.encodeBase64(nonce) });
 }
-function decryptMsg(payload, senderPub, myPriv) {
+
+function decryptMsg(payload, senderPubB64, myPriv) {
   try {
     const { e, n } = JSON.parse(payload);
-    const dec = nacl.box.open(naclUtil.decodeBase64(e), naclUtil.decodeBase64(n), naclUtil.decodeBase64(senderPub), myPriv);
-    return dec ? naclUtil.encodeUTF8(dec) : "🔒 Encrypted";
-  } catch { return "🔒 Encrypted"; }
+    const open = nacl.box.open(
+      naclUtil.decodeBase64(e),
+      naclUtil.decodeBase64(n),
+      naclUtil.decodeBase64(senderPubB64),
+      myPriv
+    );
+    return open ? naclUtil.encodeUTF8(open) : '🔒 Encrypted';
+  } catch { return '🔒 Encrypted'; }
 }
 
 // REGISTER
 async function register() {
   const u = document.getElementById('reg-username').value.trim();
   const p = document.getElementById('reg-password').value.trim();
-  if (!u || !p) return showError('reg-error', 'Fill all fields');
-  if (p.length < 4) return showError('reg-error', 'Password min 4 characters');
+  if (!u || !p) return showErr('reg-error', 'Please fill all fields');
+  if (p.length < 4) return showErr('reg-error', 'Password min 4 characters');
   const btn = document.getElementById('reg-btn');
-  btn.disabled = true; btn.textContent = 'Generating keys...';
+  btn.disabled = true; btn.textContent = 'Creating keys...';
   try {
     const kp = nacl.box.keyPair();
     const pubB64 = naclUtil.encodeBase64(kp.publicKey);
@@ -402,23 +421,21 @@ async function register() {
       body: JSON.stringify({ username: u, password: p, publicKey: pubB64, encryptedPrivateKey: encPriv })
     });
     const data = await res.json();
-    if (!res.ok) { showError('reg-error', data.error); btn.disabled=false; btn.textContent='Create Account'; return; }
-    token=data.token; username=data.username;
-    myPrivateKey=kp.secretKey; myPublicKey=kp.publicKey;
-    enterContacts();
-  } catch(err) {
-    showError('reg-error', err.message||'Connection error');
+    if (!res.ok) { showErr('reg-error', data.error || 'Failed'); btn.disabled=false; btn.textContent='Create Account'; return; }
+    myToken = data.token; myUsername = data.username;
+    myPrivateKey = kp.secretKey; myPublicKey = kp.publicKey;
     btn.disabled=false; btn.textContent='Create Account';
-  }
+    enterContacts();
+  } catch { showErr('reg-error', 'Connection error'); btn.disabled=false; btn.textContent='Create Account'; }
 }
 
 // LOGIN
 async function login() {
   const u = document.getElementById('login-username').value.trim();
   const p = document.getElementById('login-password').value.trim();
-  if (!u || !p) return showError('login-error', 'Fill all fields');
+  if (!u || !p) return showErr('login-error', 'Please fill all fields');
   const btn = document.getElementById('login-btn');
-  btn.disabled=true; btn.textContent='Decrypting...';
+  btn.disabled = true; btn.textContent = 'Logging in...';
   try {
     const res = await fetch(BACKEND + '/login', {
       method: 'POST',
@@ -426,72 +443,70 @@ async function login() {
       body: JSON.stringify({ username: u, password: p })
     });
     const data = await res.json();
-    if (!res.ok) { showError('login-error', data.error); btn.disabled=false; btn.textContent='Login'; return; }
-    const priv = await decryptPrivKey(data.encryptedPrivateKey, p);
-    if (!priv) { showError('login-error', 'Key decryption failed'); btn.disabled=false; btn.textContent='Login'; return; }
-    token=data.token; username=data.username;
-    myPrivateKey=priv; myPublicKey=naclUtil.decodeBase64(data.publicKey);
-    enterContacts();
-  } catch(err) {
-    showError('login-error', err.message||'Connection error');
+    if (!res.ok) { showErr('login-error', data.error || 'Failed'); btn.disabled=false; btn.textContent='Login'; return; }
+    const privKey = await decryptPrivKey(data.encryptedPrivateKey, p);
+    if (!privKey) { showErr('login-error', 'Failed to decrypt keys'); btn.disabled=false; btn.textContent='Login'; return; }
+    myToken = data.token; myUsername = data.username;
+    myPrivateKey = privKey; myPublicKey = naclUtil.decodeBase64(data.publicKey);
     btn.disabled=false; btn.textContent='Login';
-  }
+    enterContacts();
+  } catch { showErr('login-error', 'Connection error'); btn.disabled=false; btn.textContent='Login'; }
 }
 
 // CONTACTS
-function enterContacts() {
-  document.getElementById('my-badge').textContent = username;
-  document.getElementById('login-btn').disabled=false;
-  document.getElementById('login-btn').textContent='Login';
+async function enterContacts() {
+  document.getElementById('my-badge').textContent = myUsername;
   showScreen('contacts-screen');
-  showToast('Welcome ' + username + '!');
-  loadContacts();
+  showToast('Welcome ' + myUsername + ' 👋');
+  await loadContacts();
 }
 
 async function loadContacts() {
   const list = document.getElementById('contacts-list');
-  list.innerHTML = '<div class="loading-text">Loading...</div>';
+  const countEl = document.getElementById('contacts-count');
+  list.innerHTML = '<div style="padding:30px;text-align:center;color:#888">Loading...</div>';
   try {
-    const res = await fetch(BACKEND + '/users', { headers: { 'Authorization': 'Bearer ' + token } });
+    const res = await fetch(BACKEND + '/users', { headers: { 'Authorization': 'Bearer ' + myToken } });
     const users = await res.json();
-    list.innerHTML = '';
-    if (!users.length) {
-      list.innerHTML = '<div class="empty-state"><div class="empty-icon">🙁</div><strong>No users yet</strong><span>Ask a friend to register!</span></div>';
+    if (!Array.isArray(users) || users.length === 0) {
+      countEl.textContent = '0 contacts';
+      list.innerHTML = '<div class="empty-state"><div class="empty-icon">👥</div><strong>No users yet</strong><span>Ask a friend to register!</span></div>';
       return;
     }
+    countEl.textContent = users.length + ' contact' + (users.length > 1 ? 's' : '');
+    list.innerHTML = '';
     users.forEach(u => {
-      const color = getColor(u.username);
+      const color = colorFor(u.username);
       const item = document.createElement('div');
       item.className = 'contact-item';
       item.innerHTML = `
-        <div class="contact-avatar" style="background:${color}">${u.username[0].toUpperCase()}</div>
+        <div class="contact-av" style="background:${color}">${u.username[0].toUpperCase()}</div>
         <div class="contact-details">
           <div class="contact-name">${u.username}</div>
-          <div class="contact-sub">🔐 End-to-end encrypted</div>
+          <div class="contact-hint">🔐 Tap to chat privately</div>
         </div>
         <div class="contact-arrow">›</div>`;
       item.onclick = () => openChat(u.username, u.publicKey);
       list.appendChild(item);
     });
   } catch {
-    list.innerHTML = '<div class="loading-text" style="color:#dc2626">Failed to load</div>';
+    list.innerHTML = '<div style="padding:30px;text-align:center;color:#ef4444">Failed to load contacts</div>';
   }
 }
 
 // OPEN CHAT
-async function openChat(partner, pubKeyB64) {
+async function openChat(partner, partnerPublicKey) {
   currentPartner = partner;
-  currentRoom = getRoomId(username, partner);
-  partnerPubB64 = pubKeyB64;
+  currentRoom = roomId(myUsername, partner);
+  partnerPubB64 = partnerPublicKey;
 
-  const color = getColor(partner);
+  const color = colorFor(partner);
+  document.getElementById('chat-name').textContent = partner;
   document.getElementById('chat-av').textContent = partner[0].toUpperCase();
   document.getElementById('chat-av').style.background = color;
-  document.getElementById('chat-name').textContent = partner;
-  document.getElementById('messages').innerHTML =
-    '<div class="empty-state" id="empty-state"><div class="empty-icon">👋</div><strong>No messages yet</strong><span>Say hello!</span></div>';
+  document.getElementById('messages').innerHTML = '<div id="chat-empty"><div class="empty-icon">👋</div><strong>No messages yet</strong><span>Say hello to ' + partner + '!</span></div>';
 
-  socket.emit('join_room', { userA: username, userB: partner });
+  socket.emit('join_room', { userA: myUsername, userB: partner });
   showScreen('chat-screen');
   await loadMessages();
 }
@@ -499,81 +514,100 @@ async function openChat(partner, pubKeyB64) {
 // LOAD MESSAGES
 async function loadMessages() {
   try {
-    const res = await fetch(BACKEND + '/messages/' + currentRoom, {
-      headers: { 'Authorization': 'Bearer ' + token }
-    });
+    const res = await fetch(BACKEND + '/messages/' + currentRoom, { headers: { 'Authorization': 'Bearer ' + myToken } });
     const msgs = await res.json();
-    if (msgs.length) {
-      document.getElementById('empty-state')?.remove();
-      for (const m of msgs) {
-        const isMine = m.username === username;
-        let text = m.text;
-        try {
-          const senderPub = isMine ? naclUtil.encodeBase64(myPublicKey) : partnerPubB64;
-          text = decryptMsg(m.text, senderPub, myPrivateKey);
-        } catch {}
-        addBubble(m.username, text, m.timestamp, false);
-      }
-      scrollBottom();
+    if (!Array.isArray(msgs) || msgs.length === 0) return;
+    document.getElementById('chat-empty')?.remove();
+    for (const m of msgs) {
+      const isMine = m.username === myUsername;
+      let text = m.text;
+      try {
+        // Sender encrypted with receiver's pubkey
+        // If mine: I encrypted with partner's pubkey → decrypt using partner's pubkey + my privkey
+        // If theirs: they encrypted with my pubkey → decrypt using their pubkey + my privkey
+        const senderPub = isMine ? naclUtil.encodeBase64(myPublicKey) : partnerPubB64;
+        text = decryptMsg(m.text, senderPub, myPrivateKey);
+      } catch { text = '🔒 Encrypted'; }
+      renderBubble(m.username, text, m.timestamp, false);
     }
+    scrollBottom();
   } catch {}
 }
 
 // SEND
-document.getElementById('send-btn').addEventListener('click', sendMessage);
-document.getElementById('msg-input').addEventListener('keypress', e => { if(e.key==='Enter') sendMessage(); });
+document.getElementById('send-btn').addEventListener('click', sendMsg);
+document.getElementById('msg-input').addEventListener('keypress', e => { if (e.key === 'Enter') sendMsg(); });
 
-function sendMessage() {
-  const input = document.getElementById('msg-input');
-  const text = input.value.trim();
-  if (!text || !username || !currentRoom || !partnerPubB64 || !myPrivateKey) return;
-  const encrypted = encryptMsg(text, partnerPubB64, myPrivateKey);
-  socket.emit('send_message', { username, text: encrypted, roomId: currentRoom });
-  input.value = '';
-  document.getElementById('empty-state')?.remove();
-  addBubble(username, text, new Date(), true);
-  scrollBottom();
+function sendMsg() {
+  const text = document.getElementById('msg-input').value.trim();
+  if (!text || !myUsername || !currentRoom || !partnerPubB64 || !myPrivateKey) return;
+  try {
+    const encrypted = encryptMsg(text, partnerPubB64, myPrivateKey);
+    socket.emit('send_message', { username: myUsername, text: encrypted, roomId: currentRoom });
+    document.getElementById('msg-input').value = '';
+    document.getElementById('chat-empty')?.remove();
+    renderBubble(myUsername, text, new Date().toISOString(), true);
+    scrollBottom();
+  } catch { showToast('Send failed'); }
 }
 
-// RECEIVE — KEY FIX: only show if message is for current room
+// RECEIVE
 socket.on('receive_message', data => {
-  if (data.username === username) return;
-  if (!currentRoom || !partnerPubB64) return;
-  // Only show if sender is current chat partner
-  if (data.username !== currentPartner) return;
-  document.getElementById('empty-state')?.remove();
+  if (data.username === myUsername) return;
+  if (!currentRoom) return;
+  document.getElementById('chat-empty')?.remove();
   let text = data.text;
-  try { text = decryptMsg(data.text, partnerPubB64, myPrivateKey); } catch {}
-  addBubble(data.username, text, data.timestamp, true);
+  try {
+    // They encrypted with MY public key — decrypt using their pubkey + my privkey
+    text = decryptMsg(data.text, partnerPubB64, myPrivateKey);
+  } catch { text = '🔒 Encrypted'; }
+  renderBubble(data.username, text, data.timestamp, true);
   scrollBottom();
 });
 
-function addBubble(user, text, timestamp, animate) {
-  const isMine = user === username;
-  const color = getColor(user);
-  const time = new Date(timestamp).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+// RENDER BUBBLE
+function renderBubble(user, text, timestamp, animate) {
+  const isMine = user === myUsername;
+  const color = colorFor(user);
+  const time = new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   const row = document.createElement('div');
   row.className = 'msg-row ' + (isMine ? 'mine' : 'other');
-  if (!animate) row.style.animation = 'none';
+  if (animate) {
+    row.style.cssText = 'opacity:0;transform:translateY(8px);transition:all 0.2s ease';
+    setTimeout(() => { row.style.opacity='1'; row.style.transform='translateY(0)'; }, 10);
+  }
   row.innerHTML = `
     <div class="msg-av" style="background:${color}">${user[0].toUpperCase()}</div>
     <div class="msg-bubble">
-      <div>${text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
+      <div>${escHtml(text)}</div>
       <div class="msg-time">${time}</div>
     </div>`;
   document.getElementById('messages').appendChild(row);
 }
 
-function scrollBottom() { const m=document.getElementById('messages'); m.scrollTop=m.scrollHeight; }
-function goBack() { currentRoom=''; currentPartner=''; partnerPubB64=null; showScreen('contacts-screen'); }
+function escHtml(t) {
+  return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function scrollBottom() {
+  const m = document.getElementById('messages');
+  setTimeout(() => m.scrollTop = m.scrollHeight, 50);
+}
+
+function goBack() {
+  currentRoom = ''; currentPartner = ''; partnerPubB64 = '';
+  showScreen('contacts-screen');
+  loadContacts();
+}
+
 function logout() {
-  username=''; token=''; currentRoom=''; currentPartner='';
-  myPrivateKey=null; myPublicKey=null; partnerPubB64=null;
+  myUsername=''; myToken=''; myPrivateKey=null; myPublicKey=null;
+  currentRoom=''; currentPartner=''; partnerPubB64='';
   showScreen('auth-screen');
 }
 
-document.getElementById('login-password').addEventListener('keypress', e => { if(e.key==='Enter') login(); });
-document.getElementById('reg-password').addEventListener('keypress', e => { if(e.key==='Enter') register(); });
+document.getElementById('login-password').addEventListener('keypress', e => { if (e.key==='Enter') login(); });
+document.getElementById('reg-password').addEventListener('keypress', e => { if (e.key==='Enter') register(); });
 </script>
 </body>
 </html>
